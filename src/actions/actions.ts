@@ -1,7 +1,9 @@
 "use server";
 
 import { prisma } from "@/db/prisma";
+import { Ticket } from "@/generated/prisma";
 import { getAuthStatus } from "@/lib/auth";
+import { revalidatePath } from "next/cache";
 
 // !------ LEARNING -------!
 // 1. Creating custom validation instead of using Zod to parse the incoming data
@@ -82,6 +84,9 @@ export type TicketFormState =
     }
   | { success: true; message: string };
 
+// ------------ Actions --------------
+
+// Create
 export const createTicket = async (
   prevState: TicketFormState,
   form: FormData
@@ -89,7 +94,7 @@ export const createTicket = async (
   // Security
   // Check Auth
   // Validate the request | DONT TRUST THE DATA
-  const { isAuthed } = await getAuthStatus();
+  const { isAuthed, email } = await getAuthStatus();
 
   if (!isAuthed) {
     return {
@@ -110,7 +115,12 @@ export const createTicket = async (
 
   try {
     await prisma.ticket.create({
-      data: result.parsedData,
+      data: {
+        ...result.parsedData,
+        user: {
+          connect: { email: email! },
+        },
+      },
     });
 
     return {
@@ -126,3 +136,127 @@ export const createTicket = async (
     };
   }
 };
+
+type GetTicketsResponse =
+  | { success: true; tickets: Ticket[] }
+  | { success: false; error: string };
+
+// Get Tickets
+export const getTickets = async (): Promise<GetTicketsResponse> => {
+  const { isAuthed } = await getAuthStatus();
+  if (!isAuthed) {
+    return { success: false, error: "User must be authenticated" };
+  }
+  try {
+    const tickets = await prisma.ticket.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+
+    return { success: true, tickets };
+  } catch (error) {
+    console.error("Failed to fetch tickets:", error);
+    return { success: false, error: "Something vent wrong" };
+  }
+};
+
+type GetSingleTicketResponse =
+  | { success: true; ticket: Ticket }
+  | { success: false; error: string };
+
+export const getSingleTicket = async (
+  id: string
+): Promise<GetSingleTicketResponse> => {
+  const { isAuthed } = await getAuthStatus();
+  if (!isAuthed) {
+    return { success: false, error: "User must be authenticated" };
+  }
+
+  try {
+    const ticket = await prisma.ticket.findUnique({
+      where: {
+        id: parseInt(id),
+      },
+    });
+
+    if (!ticket) {
+      return { success: false, error: "Ticket not found" };
+    }
+
+    return {
+      success: true,
+      ticket: ticket,
+    };
+  } catch (error) {
+    console.error("Failed to fetch tickets:", error);
+    return { success: false, error: "Something vent wrong" };
+  }
+};
+
+// Delete ticket
+export async function closeTicket(
+  prevState: { success: boolean; message: string },
+  formData: FormData
+): Promise<{ success: boolean; message: string }> {
+  const ticketId = Number(formData.get("ticketId"));
+
+  if (!ticketId) {
+    return { success: false, message: "Ticket ID is Required" };
+  }
+
+  const { isAuthed, email } = await getAuthStatus();
+
+  if (!isAuthed) {
+    return { success: false, message: "Unauthorized" };
+  }
+
+  const ticket = await prisma.ticket.findUnique({
+    where: { id: ticketId },
+    include: { user: true },
+  });
+
+  if (!ticket || !ticket.user) {
+    return {
+      success: false,
+      message: "Ticket or associated user not found",
+    };
+  }
+
+  if (ticket.user.email !== email) {
+    return {
+      success: false,
+      message: "You are not authorized to close this ticket",
+    };
+  }
+
+  await prisma.ticket.update({
+    where: { id: ticketId },
+    data: { status: "Closed" },
+  });
+
+  revalidatePath("/tickets");
+  revalidatePath(`/tickets/${ticketId}`);
+
+  return { success: true, message: "Ticket closed successfully" };
+}
+
+// Register user to DB
+export async function registerUserIfNeeded(user: {
+  id: string;
+  email: string | null;
+  given_name?: string | null;
+  family_name?: string | null;
+}) {
+  const existingUser = await prisma.user.findUnique({
+    where: { email: user.email ?? "" },
+  });
+
+  if (!existingUser) {
+    await prisma.user.create({
+      data: {
+        email: user.email ?? "",
+        name:
+          [user.given_name, user.family_name].filter(Boolean).join(" ") || null,
+      },
+    });
+  }
+}
