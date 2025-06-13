@@ -3,6 +3,7 @@ import { LoginLink, LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
 import Link from "next/link";
 import React from "react";
 import { BiUser } from "react-icons/bi";
+import { FaTicketAlt } from "react-icons/fa";
 
 export const Header = async () => {
   const { isAuthed, email } = await getAuthStatus();
@@ -10,7 +11,8 @@ export const Header = async () => {
   return (
     <header className='w-full h-16 p-10 bg-slate-700 flex items-center justify-between'>
       <div>
-        <Link href={"#"}>Logo</Link>
+        <FaTicketAlt className='mx-auto mb-4 text-red-600' size={20} />
+        <Link href={"/"}>Quick Ticket</Link>
       </div>
 
       <div>

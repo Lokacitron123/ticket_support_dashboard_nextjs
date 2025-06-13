@@ -3,6 +3,7 @@
 import { useActionState, useEffect } from "react";
 import { createTicket, TicketFormState } from "@/actions/actions";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export const NewTicketForm = () => {
   const initialState: TicketFormState = {
@@ -17,11 +18,15 @@ export const NewTicketForm = () => {
   };
   const [state, formAction] = useActionState(createTicket, initialState);
 
+  const router = useRouter();
+
   useEffect(() => {
-    if (state.success) {
-      toast.success("Ticket submitted successfully!");
+    if (state.message) {
+      toast.success(state.message);
+
+      router.push("/tickets");
     }
-  }, [state.success]);
+  }, [state.message, router]);
 
   return (
     <div className='w-full max-w-md bg-white shadow-md rounded-lg p-8 border border-gray-200'>
@@ -43,11 +48,13 @@ export const NewTicketForm = () => {
         </div>
       )}
 
-      {state.success && state.message && (
+      {/* {state.success && state.message && (
         <div className='text-green-500 mb-4 text-center'>
-          <p>{state.message}</p>
+          <p>
+            {state.message} {state.success}
+          </p>
         </div>
-      )}
+      )} */}
 
       <form action={formAction} className='space-y-4 text-gray-700'>
         <input
