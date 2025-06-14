@@ -12,14 +12,15 @@ export async function getAuthStatus() {
   if (!user || !user.id) return { isAuthed: false };
 
   // Get admin status
-  const roles = await getRoles();
-  const admin = roles?.some((role) => role.key == "admin");
+
+  const roles = (await getRoles()) ?? [];
+  const admin = roles.some((role) => role.key === "admin");
 
   // Return values necessary for rending, auth checks, displaying user info
   return {
     isAuthed: true,
     userId: user.id,
     email: user.email ?? null,
-    admin,
+    admin: admin,
   };
 }

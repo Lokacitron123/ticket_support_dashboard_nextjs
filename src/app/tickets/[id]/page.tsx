@@ -17,7 +17,7 @@ export default async function TicketPage({ params }: Props) {
   }
   const { ticket } = response;
   return (
-    <div className='max-w-2xl mx-auto bg-white rounded-lg shadow border border-gray-200 p-8 space-y-6'>
+    <div className='bg-white rounded-lg shadow border border-gray-200 p-10 space-y-6'>
       <h1 className='text-3xl font-bold text-blue-600'>{ticket.subject}</h1>
 
       <div className='text-gray-700'>
