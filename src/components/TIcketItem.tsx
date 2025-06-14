@@ -12,7 +12,7 @@ export const TicketItem = ({ ticket }: Props) => {
   return (
     <div
       key={ticket.id}
-      className={`flex justify-between gap-3 bg-white rounded-lg shadow border border-gray-200 p-8 ${
+      className={`w-full flex justify-between gap-3 bg-white rounded-lg shadow border border-gray-200 p-8 ${
         isClosed ? "opacity-50" : ""
       }`}
     >
