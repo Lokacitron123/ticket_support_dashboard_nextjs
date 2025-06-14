@@ -9,7 +9,7 @@ export const Header = async () => {
   const { isAuthed, email } = await getAuthStatus();
 
   return (
-    <header className='sticky top-10 m-10 rounded-full h-16 p-10 bg-slate-700 flex items-center justify-between z-50'>
+    <header className='fixed top-10 left-10 right-10 z-50 bg-slate-700 rounded-full h-16 px-10 flex items-center justify-between shadow-lg'>
       <div className='flex items-center gap-1.5 text-2xl '>
         <FaTicketAlt className=' text-red-600' size={40} />
         <Link href={"/"}>Quick Ticket</Link>

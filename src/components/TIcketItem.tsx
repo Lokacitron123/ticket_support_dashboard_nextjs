@@ -24,17 +24,17 @@ export const TicketItem = ({ ticket }: Props) => {
       </div>
       {/* Right Side */}
       <div className='text-center space-y-2'>
-        <div className='text-sm text-gray-500'>
+        <p className='text-sm text-gray-500'>
           Priority:{" "}
           <span className={getPriorityClass(ticket.priority)}>
             {ticket.priority}
           </span>
-        </div>
+        </p>
         <Link
           href={`/tickets/${ticket.id}`}
           className={`inline-block mt-2 text-sm px-3 py-1 rounded transition text-center ${
             isClosed
-              ? "bg-gray-400 text-gray-700 cursor-not-allowed pointer-events-none"
+              ? "bg-gray-400 text-gray-700 hover:bg-gray-500"
               : "bg-blue-600 text-white hover:bg-blue-700 "
           }`}
         >
