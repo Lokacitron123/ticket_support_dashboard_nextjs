@@ -57,27 +57,45 @@ export const NewTicketForm = () => {
       )} */}
 
       <form action={formAction} className='space-y-4 text-gray-700'>
+        <label htmlFor='subject' className='sr-only'>
+          Type in your subject
+        </label>
         <input
+          id='subject'
           className='w-full border border-gray-200 p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-400'
           type='text'
           name='subject'
           placeholder='Subject'
+          required
         />
+
+        <label htmlFor='description' className='sr-only'>
+          Describe your issue.{" "}
+        </label>
         <textarea
+          id='description'
           className='w-full border border-gray-200 p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-400'
           name='description'
           placeholder='Describe your issue'
           rows={4}
+          required
         />
+
+        <label htmlFor='priority' className='sr-only'>
+          Select priority
+        </label>
         <select
+          id='priority'
           className='w-full border border-gray-200 p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700'
           name='priority'
           defaultValue='Low'
+          required
         >
           <option value='Low'>Low Priority</option>
           <option value='Medium'>Medium Priority</option>
           <option value='High'>High Priority</option>
         </select>
+
         <button
           className='w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700 transition disabled:opacity-50'
           type='submit'
