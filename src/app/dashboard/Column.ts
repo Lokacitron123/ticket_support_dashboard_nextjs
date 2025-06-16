@@ -1,14 +1,5 @@
 import { Ticket } from "@/generated/prisma";
-import {
-  useReactTable,
-  createColumnHelper,
-  getCoreRowModel,
-  flexRender,
-} from "@tanstack/react-table";
-
-type Props = {
-  tickets: Ticket[] | undefined;
-};
+import { createColumnHelper } from "@tanstack/react-table";
 
 const columnHelper = createColumnHelper<Ticket>();
 
