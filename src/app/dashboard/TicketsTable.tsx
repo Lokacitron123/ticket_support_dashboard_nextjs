@@ -1,14 +1,18 @@
 "use client";
 
 import { Ticket } from "@/generated/prisma";
+import { FaArrowUp, FaArrowDown, FaArrowsAltV } from "react-icons/fa";
 
 import {
+  createColumnHelper,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
+  getSortedRowModel,
+  HeaderContext,
+  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { Columns } from "./Column";
+
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -16,24 +20,82 @@ type Props = {
   tickets: Ticket[] | undefined;
 };
 
-interface ColumnFilter {
-  id: string;
-  value: unknown;
-}
-type ColumnFiltersState = ColumnFilter[];
+const columnHelper = createColumnHelper<Ticket>();
+
+const getSortableHeader = (label: string) => {
+  const SortableHeader = (header: HeaderContext<Ticket, unknown>) => {
+    const column = header.column;
+    return (
+      <button
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className='w-full pl-1 pr-2 py-1 flex items-center justify-between text-left font-medium  rounded'
+      >
+        {label}
+        {column.getIsSorted() === "asc" && (
+          <FaArrowUp className='ml-2 h-4 w-4' />
+        )}
+        {column.getIsSorted() === "desc" && (
+          <FaArrowDown className='ml-2 h-4 w-4' />
+        )}
+        {column.getIsSorted() == null && (
+          <FaArrowsAltV className='ml-2 h-4 w-4' />
+        )}
+      </button>
+    );
+  };
+
+  SortableHeader.displayName = `SortableHeader(${label})`;
+  return SortableHeader;
+};
+
+export const columns = [
+  columnHelper.accessor("id", {
+    header: getSortableHeader("ID"),
+    cell: (info) => info.getValue(),
+  }),
+  columnHelper.accessor("subject", {
+    header: getSortableHeader("Subject"),
+    cell: (info) => info.getValue(),
+  }),
+  columnHelper.accessor("priority", {
+    header: getSortableHeader("Priority"),
+    cell: (info) => info.getValue(),
+  }),
+  columnHelper.accessor("status", {
+    header: getSortableHeader("Status"),
+    cell: (info) => info.getValue(),
+  }),
+  columnHelper.accessor("createdAt", {
+    header: getSortableHeader("Created"),
+    cell: (info) =>
+      info.getValue() instanceof Date
+        ? info.getValue().toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          })
+        : info.getValue(),
+  }),
+];
 
 export const TicketsTable = ({ tickets }: Props) => {
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [sorting, setSorting] = useState<SortingState>([
+    {
+      id: "id",
+      desc: false,
+    },
+  ]);
 
   const router = useRouter();
   const table = useReactTable({
     data: tickets ?? [],
-    columns: Columns,
+    columns: columns,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     state: {
-      columnFilters,
+      sorting,
     },
-    onColumnFiltersChange: setColumnFilters,
+    onSortingChange: setSorting,
   });
 
   return (
@@ -44,12 +106,16 @@ export const TicketsTable = ({ tickets }: Props) => {
             <tr key={headerGroup.id} className=''>
               {headerGroup.headers.map((header) => (
                 <th key={header.id} className='border p-4 text-left'>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
+                  <div className='flex gap-3'>
+                    <div>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </div>
+                  </div>
                 </th>
               ))}
             </tr>
