@@ -1,6 +1,7 @@
 import { getTickets } from "@/actions/actions";
 import { TicketItem } from "@/components/TIcketItem";
 import { getAuthStatus } from "@/lib/auth";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function TicketsPage() {
@@ -31,7 +32,15 @@ export default async function TicketsPage() {
             Open Tickets
           </h2>
           {openTickets.length === 0 ? (
-            <p className='text-center text-gray-600'>No Open Tickets Yet</p>
+            <div className='flex items-center flex-col gap-3'>
+              <p className='text-center text-gray-600'>No Open Tickets Yet</p>
+              <Link
+                href='/tickets/new'
+                className='px-6 py-3 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition'
+              >
+                Submit a Ticket
+              </Link>
+            </div>
           ) : (
             <ul className='space-y-4 min-w-[350px]'>
               {openTickets.map((ticket) => (
